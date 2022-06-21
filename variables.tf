@@ -14,6 +14,11 @@ variable "error_document" {
   default = "index.html"
 }
 
+variable "custom_error_index_document" {
+  default = "/index.html"
+  description = "global error document for reactor router"
+}
+
 variable "s3_origin_id" {
   default = ""
 }
