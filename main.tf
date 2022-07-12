@@ -95,6 +95,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       }
     }
 
+    dynamic "function_association" {
+      for_each = var.function_association == null ? [] : var.function_association
+      content {
+        event_type = function_association.value.event_type
+        function_arn = function_association.value.function_arn
+      }
+    }
+
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = var.min_ttl
     default_ttl            = var.default_ttl

@@ -1,3 +1,13 @@
+resource "aws_cloudfront_function" "basicauth" {
+  name    = "basicauth"
+  runtime = "cloudfront-js-1.0"
+  publish = true
+  code    = templatefile("${path.module}/templates/functions/basicauth.js", {
+    # base64 from: `echo -n "user:password" |base64`
+    basicauth_string = "dXNlcjpwYXNzd29yZA=="
+  })
+}
+
 module "cloudfront_app_example" {
 
   source = "github.com/silksh-terraform-modules/terraform-aws-cloudfront-s3-origin?ref=v0.0.1"
@@ -17,6 +27,11 @@ module "cloudfront_app_example" {
   rf_source_bucket = "www.example.${var.tld}"
   rf_domain_name = "www.example.${var.tld}"
 
+  function_association = [{
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.basicauth.arn
+    }]
+  
   # restriction_locations = ["PL"]
   
   ## optional redirects: 

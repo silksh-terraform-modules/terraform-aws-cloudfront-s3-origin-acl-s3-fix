@@ -104,3 +104,13 @@ variable "lambda_association" {
   default = null
   
 }
+
+variable "function_association" {
+  type = list(object({
+    event_type = string,
+    function_arn = string
+  }))
+
+  default = null
+  
+}
