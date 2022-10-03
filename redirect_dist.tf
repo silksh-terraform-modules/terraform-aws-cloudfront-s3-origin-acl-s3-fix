@@ -1,7 +1,12 @@
 resource "aws_s3_bucket" "redirect" {
   count = var.create_redirect ? 1 : 0
   bucket = var.rf_source_bucket
-  acl    = "public-read"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_policy" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
   policy = <<EOF
 {
   "Version":"2012-10-17",
@@ -15,8 +20,12 @@ resource "aws_s3_bucket" "redirect" {
   ]
 }
 EOF
+}
 
-  force_destroy = true
+resource "aws_s3_bucket_acl" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
+  acl = "public-read"
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "redirect" {

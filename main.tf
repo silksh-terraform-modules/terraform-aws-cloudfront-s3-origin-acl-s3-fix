@@ -1,6 +1,10 @@
 resource "aws_s3_bucket" "b" {
   bucket = var.source_bucket
-  acl    = "public-read"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_policy" "b" {
+  bucket = aws_s3_bucket.b.bucket
   policy = <<EOF
 {
   "Version":"2012-10-17",
@@ -14,8 +18,11 @@ resource "aws_s3_bucket" "b" {
   ]
 }
 EOF
+}
 
-  force_destroy = true
+resource "aws_s3_bucket_acl" "b" {
+  bucket = aws_s3_bucket.b.bucket
+  acl = "public-read"
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "b" {
