@@ -6,12 +6,11 @@ variable "logs_bucket" {
   default = ""
 }
 
-variable "index_document" {
-  default = "index.html"
-}
-
-variable "error_document" {
-  default = "index.html"
+variable "website" {
+    default = {
+      index_document = "index.html"
+      error_document = "index.html"
+    }
 }
 
 variable "custom_error_index_document" {
