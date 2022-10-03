@@ -1,6 +1,10 @@
 resource "aws_s3_bucket" "b" {
   bucket = var.source_bucket
-  acl    = "public-read"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_policy" "b" {
+  bucket = aws_s3_bucket.b.bucket
   policy = <<EOF
 {
   "Version":"2012-10-17",
@@ -14,29 +18,38 @@ resource "aws_s3_bucket" "b" {
   ]
 }
 EOF
+}
 
-  force_destroy = true
+resource "aws_s3_bucket_acl" "b" {
+  bucket = aws_s3_bucket.b.bucket
+  acl = "public-read"
+}
 
-  website {
-    index_document = var.index_document
-    error_document = var.error_document
-
-    routing_rules = var.routing_rules
-  }
-
-  lifecycle_rule {
-        enabled = true
-
-        noncurrent_version_expiration {
-            days = 90
-        }
+resource "aws_s3_bucket_lifecycle_configuration" "b" {
+  bucket = aws_s3_bucket.b.bucket
+  rule {
+    id = var.source_bucket
+    status = "Enabled"
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
   }
 }
 
+resource "aws_s3_bucket_website_configuration" "b" {
+  bucket = aws_s3_bucket.b.bucket
+  index_document {
+    suffix = var.index_document
+  }
+  error_document {
+    key = var.error_document
+  }
+  routing_rules = var.routing_rules
+}
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.b.website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.b.website_endpoint
     origin_id   = var.s3_origin_id
     custom_origin_config {
       http_port              = "80"

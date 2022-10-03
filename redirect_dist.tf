@@ -1,7 +1,12 @@
 resource "aws_s3_bucket" "redirect" {
   count = var.create_redirect ? 1 : 0
   bucket = var.rf_source_bucket
-  acl    = "public-read"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_policy" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
   policy = <<EOF
 {
   "Version":"2012-10-17",
@@ -15,26 +20,39 @@ resource "aws_s3_bucket" "redirect" {
   ]
 }
 EOF
+}
 
-  force_destroy = true
+resource "aws_s3_bucket_acl" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
+  acl = "public-read"
+}
 
-  website {
-    redirect_all_requests_to = "https://${var.app_domain_name}"
+resource "aws_s3_bucket_lifecycle_configuration" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
+  rule {
+    id = var.rf_source_bucket
+    status = "Enabled"
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
   }
+}
 
-  lifecycle_rule {
-        enabled = true
-
-        noncurrent_version_expiration {
-            days = 90
-        }
+resource "aws_s3_bucket_website_configuration" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
+  redirect_all_requests_to {
+    host_name = var.app_domain_name
+    protocol = "https"
   }
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution_redirect" {
   count = var.create_redirect ? 1 : 0
   origin {
-    domain_name = aws_s3_bucket.redirect[0].website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.redirect[0].website_endpoint
     origin_id   = "${var.s3_origin_id}Redir"
     custom_origin_config {
       http_port              = "80"
