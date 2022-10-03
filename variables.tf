@@ -41,6 +41,7 @@ variable "max_ttl" {
 
 variable "compress" {
   default = false
+  type = bool
 }
 
 variable "price_class" {

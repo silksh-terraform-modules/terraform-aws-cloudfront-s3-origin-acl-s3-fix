@@ -18,10 +18,6 @@ EOF
 
   force_destroy = true
 
-  website {
-    redirect_all_requests_to = "https://${var.app_domain_name}"
-  }
-
   lifecycle_rule {
         enabled = true
 
@@ -31,10 +27,19 @@ EOF
   }
 }
 
+resource "aws_s3_bucket_website_configuration" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
+  redirect_all_requests_to {
+    host_name = var.app_domain_name
+    protocol = "https"
+  }
+}
+
 resource "aws_cloudfront_distribution" "s3_distribution_redirect" {
   count = var.create_redirect ? 1 : 0
   origin {
-    domain_name = aws_s3_bucket.redirect[0].website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.redirect[0].website_endpoint
     origin_id   = "${var.s3_origin_id}Redir"
     custom_origin_config {
       http_port              = "80"
