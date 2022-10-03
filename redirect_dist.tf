@@ -17,13 +17,17 @@ resource "aws_s3_bucket" "redirect" {
 EOF
 
   force_destroy = true
+}
 
-  lifecycle_rule {
-        enabled = true
-
-        noncurrent_version_expiration {
-            days = 90
-        }
+resource "aws_s3_bucket_lifecycle_configuration" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].bucket
+  rule {
+    id = var.rf_source_bucket
+    status = "Enabled"
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
   }
 }
 

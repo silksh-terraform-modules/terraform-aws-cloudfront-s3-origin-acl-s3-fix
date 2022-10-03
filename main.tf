@@ -16,13 +16,16 @@ resource "aws_s3_bucket" "b" {
 EOF
 
   force_destroy = true
+}
 
-  lifecycle_rule {
-        enabled = true
-
-        noncurrent_version_expiration {
-            days = 90
-        }
+resource "aws_s3_bucket_lifecycle_configuration" "b" {
+  bucket = aws_s3_bucket.b.bucket
+  rule {
+    id = var.source_bucket
+    status = "Enabled"
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
   }
 }
 
