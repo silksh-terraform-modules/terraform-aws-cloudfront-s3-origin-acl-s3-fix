@@ -1,3 +1,15 @@
+resource "aws_cloudfront_response_headers_policy" "example_headers_policy" {
+  name = "example.${var.tld}_policy"
+
+  custom_headers_config {
+    items {
+      header   = "X-Robots-Tag"
+      override = true
+      value    = "noindex"
+    }
+
+  }
+}
 resource "aws_cloudfront_function" "basicauth" {
   name    = "basicauth"
   runtime = "cloudfront-js-1.0"
@@ -22,6 +34,7 @@ module "cloudfront_app_example" {
   zone_id = data.terraform_remote_state.infra.outputs.ssl_cert_zone_id_dao_us
   comment = "${var.tld} example site"
   geo_restriction = false
+  response_headers_policy_id = aws_cloudfront_response_headers_policy.example_headers_policy.id
 
   # s3 parameters
   website = {

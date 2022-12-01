@@ -131,6 +131,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = var.s3_origin_id
+    response_headers_policy_id = length(var.response_headers_policy_id) > 0 ? var.response_headers_policy_id : ""
 
     forwarded_values {
       query_string = false

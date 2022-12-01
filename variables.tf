@@ -114,3 +114,7 @@ variable "function_association" {
   default = null
   
 }
+
+variable "response_headers_policy_id" {
+  default = ""
+}
