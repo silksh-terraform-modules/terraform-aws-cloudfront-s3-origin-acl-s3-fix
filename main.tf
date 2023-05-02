@@ -20,9 +20,31 @@ resource "aws_s3_bucket_policy" "b" {
 EOF
 }
 
+resource "aws_s3_bucket_ownership_controls" "b" {
+  bucket = aws_s3_bucket.b.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "b" {
+  bucket = aws_s3_bucket.b.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+
 resource "aws_s3_bucket_acl" "b" {
   bucket = aws_s3_bucket.b.bucket
   acl = "public-read"
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.b,
+    aws_s3_bucket_public_access_block.b,
+  ]
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "b" {
