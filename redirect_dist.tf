@@ -6,6 +6,11 @@ resource "aws_s3_bucket" "redirect" {
 
 resource "aws_s3_bucket_policy" "redirect" {
   count = var.create_redirect ? 1 : 0
+  depends_on = [
+    aws_s3_bucket_ownership_controls.redirect,
+    aws_s3_bucket_public_access_block.redirect,
+  ]
+
   bucket = aws_s3_bucket.redirect[count.index].bucket
   policy = <<EOF
 {
@@ -26,7 +31,35 @@ resource "aws_s3_bucket_acl" "redirect" {
   count = var.create_redirect ? 1 : 0
   bucket = aws_s3_bucket.redirect[count.index].bucket
   acl = "public-read"
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.redirect,
+    aws_s3_bucket_public_access_block.redirect,
+  ]
 }
+
+resource "aws_s3_bucket_ownership_controls" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "redirect" {
+  count = var.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.redirect[count.index].id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.redirect,
+  ]
+}
+
 
 resource "aws_s3_bucket_lifecycle_configuration" "redirect" {
   count = var.create_redirect ? 1 : 0
