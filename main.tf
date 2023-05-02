@@ -4,6 +4,11 @@ resource "aws_s3_bucket" "b" {
 }
 
 resource "aws_s3_bucket_policy" "b" {
+  depends_on = [
+    aws_s3_bucket_ownership_controls.b,
+    aws_s3_bucket_public_access_block.b,
+  ]
+
   bucket = aws_s3_bucket.b.bucket
   policy = <<EOF
 {
