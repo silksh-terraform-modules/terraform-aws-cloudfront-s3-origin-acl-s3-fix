@@ -146,7 +146,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   custom_error_response {
     error_caching_min_ttl = 60
     error_code            = 404
-    response_code         = 200
+    response_code         = "${var.custom_error_response_code}"
     response_page_path    = "${var.custom_error_index_document}"
   }
 
@@ -221,7 +221,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     minimum_protocol_version = var.minimum_protocol_version
     ssl_support_method = "sni-only"
   }
-  depends_on = [aws_s3_bucket.b]
+  depends_on = [
+    aws_s3_bucket.b,
+  ]
 }
 
 resource "aws_route53_record" "web_record" {

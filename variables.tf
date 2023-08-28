@@ -118,3 +118,7 @@ variable "function_association" {
 variable "response_headers_policy_id" {
   default = ""
 }
+
+variable "custom_error_response_code" {
+  default = 200
+}

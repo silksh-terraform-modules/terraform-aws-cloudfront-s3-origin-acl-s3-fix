@@ -152,7 +152,9 @@ resource "aws_cloudfront_distribution" "s3_distribution_redirect" {
     minimum_protocol_version = var.minimum_protocol_version
     ssl_support_method = "sni-only"
   }
-  depends_on = [aws_s3_bucket.redirect[0]]
+  depends_on = [
+    aws_s3_bucket.redirect[0],
+  ]
 }
 
 resource "aws_route53_record" "web_record_redirect" {
